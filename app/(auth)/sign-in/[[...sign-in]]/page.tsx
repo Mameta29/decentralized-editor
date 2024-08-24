@@ -16,7 +16,7 @@ const SignInPage = () => {
 
   return (
     <main className="auth-page">
-      <p>Sign in page</p>
+      <p>Go to Next Stage Editor!</p>
       <CustomConnectButton />
     </main>
   );

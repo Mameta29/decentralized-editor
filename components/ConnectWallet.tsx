@@ -13,7 +13,7 @@ const ConnectWallet = () => {
         // クッキーを設定
         document.cookie = `wallet_address=${address}; path=/; max-age=86400; SameSite=Strict`;
         console.log('Wallet address cookie set:', address);
-        console.log('All cookies:', document.cookie);
+        // console.log('All cookies:', document.cookie);
       } else {
         console.log('Not connected or no address');
       }

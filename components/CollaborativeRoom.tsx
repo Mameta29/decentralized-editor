@@ -1,20 +1,23 @@
+// CollaborativeRoom.tsx
 'use client';
 
 import { ClientSideSuspense, RoomProvider } from '@liveblocks/react/suspense'
 import { Editor } from '@/components/editor/Editor'
 import Header from '@/components/Header'
 import ActiveCollaborators from './ActiveCollaborators';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Input } from './ui/input';
 import Image from 'next/image';
 import { updateDocument } from '@/lib/actions/room.actions';
 import Loader from './Loader';
 import ShareModal from './ShareModal';
+import SaveToGreenfield from './SaveToGreenfield';
 
 const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: CollaborativeRoomProps) => {
   const [documentTitle, setDocumentTitle] = useState(roomMetadata.title);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editorContent, setEditorContent] = useState('');
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -26,6 +29,7 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
       try {
         if(documentTitle !== roomMetadata.title) {
           const updatedDocument = await updateDocument(roomId, documentTitle);
+          console.log("今updateしたtitle", documentTitle)
           
           if(updatedDocument) {
             setEditing(false);
@@ -44,6 +48,7 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
       if(containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setEditing(false);
         updateDocument(roomId, documentTitle);
+        console.log("今updateしたtitle2", documentTitle)
       }
     }
 
@@ -59,6 +64,11 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
       inputRef.current.focus();
     }
   }, [editing])
+
+  const handleContentChange = useCallback((content: string) => {
+    console.log('Content changed:', content); // デバッグ用ログ
+    setEditorContent(content);
+  }, []);
 
   return (
     <RoomProvider id={roomId}>
@@ -110,9 +120,19 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
                   creatorId={roomMetadata.creatorId}
                   currentUserType={currentUserType}
                 />
+                <SaveToGreenfield 
+                  roomId={roomId}
+                  titleName={documentTitle}
+                  editorContent={editorContent}
+                  currentUserType={currentUserType}
+                />
               </div>
             </Header>
-          <Editor roomId={roomId} currentUserType={currentUserType} />
+            <Editor 
+              roomId={roomId} 
+              currentUserType={currentUserType} 
+              onContentChange={handleContentChange}
+            />
           </div>
         )}
       </ClientSideSuspense>

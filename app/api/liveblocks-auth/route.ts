@@ -12,10 +12,11 @@ export async function POST(request: NextRequest) {
     const walletAddress = cookieStore.get('wallet_address')?.value;
 
     console.log('Wallet address from cookie:', walletAddress);
-    console.log('All cookies:', cookieStore.getAll());
+    // console.log('All cookies:', cookieStore.getAll());
 
     if (!walletAddress) {
       console.log('No wallet address found, returning 401');
+      
       return new Response(JSON.stringify({ error: 'Unauthorized: No wallet address' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },

@@ -1,33 +1,51 @@
-'use client';
-
-import Theme from './plugins/Theme';
-import ToolbarPlugin from './plugins/ToolbarPlugin';
-import { HeadingNode } from '@lexical/rich-text';
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
+// Editor.tsx
+import { useEffect, useState } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import React from 'react';
-
+import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
+import { HeadingNode } from '@lexical/rich-text';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { FloatingComposer, FloatingThreads, liveblocksConfig, LiveblocksPlugin, useEditorStatus } from '@liveblocks/react-lexical'
-import Loader from '../Loader';
-
-import FloatingToolbarPlugin from './plugins/FloatingToolbarPlugin'
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useThreads } from '@liveblocks/react/suspense';
+import { $getRoot } from 'lexical';
+import Theme from './plugins/Theme';
+import ToolbarPlugin from './plugins/ToolbarPlugin';
+import FloatingToolbarPlugin from './plugins/FloatingToolbarPlugin';
+import Loader from '../Loader';
 import Comments from '../Comments';
 import { DeleteModal } from '../DeleteModal';
-
-// Catch any errors that occur during Lexical updates and log them
-// or throw them as needed. If you don't throw them, Lexical will
-// try to recover gracefully without losing user data.
 
 function Placeholder() {
   return <div className="editor-placeholder">Enter some rich text...</div>;
 }
 
-export function Editor({ roomId, currentUserType }: { roomId: string, currentUserType: UserType }) {
+function EditorContent({ onContentChange }: { onContentChange?: (content: string) => void }) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    if (onContentChange) {
+      const unregister = editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          const root = $getRoot();
+          const content = root.getTextContent();
+          console.log('Editor content updated:', content); // デバッグ用ログ
+          onContentChange(content);
+        });
+      });
+
+      return () => {
+        unregister();
+      };
+    }
+  }, [editor, onContentChange]);
+
+  return null;
+}
+
+export function Editor({ roomId, currentUserType, onContentChange }: { roomId: string, currentUserType: UserType, onContentChange?: (content: string) => void }) {
   const status = useEditorStatus();
   const { threads } = useThreads();
 
@@ -41,6 +59,13 @@ export function Editor({ roomId, currentUserType }: { roomId: string, currentUse
     theme: Theme,
     editable: currentUserType === 'editor',
   });
+
+  useEffect(() => {
+    console.log('Editor component mounted'); // デバッグ用ログ
+    return () => {
+      console.log('Editor component unmounted'); // デバッグ用ログ
+    };
+  }, []);
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
@@ -63,6 +88,7 @@ export function Editor({ roomId, currentUserType }: { roomId: string, currentUse
               {currentUserType === 'editor' && <FloatingToolbarPlugin />}
               <HistoryPlugin />
               <AutoFocusPlugin />
+              <EditorContent onContentChange={onContentChange} />
             </div>
           )}
 

@@ -97,6 +97,7 @@ export const updateDocument = async (roomId: string, title: string) => {
         title
       }
     })
+    // console.log("updatedRoom中身", updatedRoom)
 
     revalidatePath(`/documents/${roomId}`);
 

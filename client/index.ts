@@ -23,9 +23,14 @@ export const getAllSps = async () => {
 };
 
 export const selectSp = async () => {
+  console.log("GREEN_CHAIN_ID", GREEN_CHAIN_ID)
+  console.log("GRPC_URL", GRPC_URL)
+
   const finalSps = await getSps();
+  console.log("finalSps", finalSps)
 
   const selectIndex = Math.floor(Math.random() * finalSps.length);
+  console.log("selectIndex", selectIndex)
 
   const secondarySpAddresses = [
     ...finalSps.slice(0, selectIndex),
@@ -35,9 +40,11 @@ export const selectSp = async () => {
     id: finalSps[selectIndex].id,
     endpoint: finalSps[selectIndex].endpoint,
     primarySpAddress: finalSps[selectIndex]?.operatorAddress,
+    // primarySpAddress: "0xDfCC53C89526e4892F2C370dC99C4E47023A9eC8",
     sealAddress: finalSps[selectIndex].sealAddress,
     secondarySpAddresses,
   };
+  console.log("selectSpInfo", selectSpInfo)
 
   return selectSpInfo;
 };
