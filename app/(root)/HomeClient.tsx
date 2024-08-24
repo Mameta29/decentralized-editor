@@ -1,8 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import { DocumentsResponse } from '@/lib/actions/room.actions';
+import { listBuckets, listBucketObjects } from '@/lib/greenfield';
 import AddDocumentBtn from '@/components/AddDocumentBtn';
 import { DeleteModal } from '@/components/DeleteModal';
 import Header from '@/components/Header';
@@ -10,10 +14,6 @@ import Notifications from '@/components/Notifications';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { dateConverter } from '@/lib/utils';
-import Image from 'next/image';
-import Link from 'next/link';
-import { DocumentsResponse } from '@/lib/actions/room.actions';
-import { listBuckets, listBucketObjects } from '@/lib/greenfield';
 
 interface HomeClientProps {
   initialDocuments: DocumentsResponse;
@@ -60,7 +60,7 @@ const HomeClient: React.FC<HomeClientProps> = ({ initialDocuments }) => {
     if (address && connector) {
       try {
         const objects = await listBucketObjects(bucketName, connector, address);
-        setBucketObjects(objects);
+        setBucketObjects(objects as any);
       } catch (error) {
         console.error('Error fetching bucket objects:', error);
       }
@@ -70,6 +70,12 @@ const HomeClient: React.FC<HomeClientProps> = ({ initialDocuments }) => {
   const handleBucketChange = (value: string) => {
     setSelectedBucket(value);
     fetchBucketObjects(value);
+  };
+
+  const handleObjectClick = (objectName: string) => {
+    // オブジェクト名からroomIdを抽出する（例：objectName が "roomId_title.txt" の形式だと仮定）
+    const roomId = objectName.split('_')[0];
+    router.push(`/documents/${roomId}`);
   };
 
   if (!isConnected || !address) {
@@ -91,19 +97,7 @@ const HomeClient: React.FC<HomeClientProps> = ({ initialDocuments }) => {
           <div className="flex items-center gap-4">
             <Select onValueChange={handleBucketChange} value={selectedBucket}>
               <SelectTrigger className="w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-                <SelectValue placeholder="Select a bucket">
-                {/* <div className="flex items-center gap-2">
-                  <Image 
-                    src="/assets/icons/add.svg" 
-                    alt="add" 
-                    width={24} 
-                    height={24}
-                  /> */}
-                  {/* <span className="hidden sm:block">
-                    {selectedBucket || "Select a bucket"}
-                  </span>
-                </div> */}
-                </SelectValue>
+                <SelectValue placeholder="Select a bucket" />
               </SelectTrigger>
               <SelectContent>
                 {buckets.map((bucket) => (
@@ -124,7 +118,11 @@ const HomeClient: React.FC<HomeClientProps> = ({ initialDocuments }) => {
           bucketObjects.length > 0 ? (
             <ul className="document-ul">
               {bucketObjects.map((object) => (
-                <li key={object.ObjectInfo.ObjectName} className="document-list-item">
+                <li 
+                  key={object.ObjectInfo.ObjectName} 
+                  className="document-list-item cursor-pointer"
+                  onClick={() => handleObjectClick(object.ObjectInfo.ObjectName)}
+                >
                   <div className="flex flex-1 items-center gap-4">
                     <div className="hidden rounded-md bg-dark-500 p-2 sm:block">
                       <Image 

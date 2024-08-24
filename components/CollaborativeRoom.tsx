@@ -122,7 +122,7 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
                 />
                 <SaveToGreenfield 
                   roomId={roomId}
-                  titleName={documentTitle}
+                  title={documentTitle}
                   editorContent={editorContent}
                   currentUserType={currentUserType}
                 />

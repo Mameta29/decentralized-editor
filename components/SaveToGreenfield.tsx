@@ -22,7 +22,7 @@ const SaveToGreenfield: React.FC<SaveToGreenfieldProps> = ({ roomId, title, edit
 
   const handleSave = async () => {
     setLoading(true);
-    const bucketName = "my-bucket2";
+    const bucketName = "my-bucket3";
     const objectName = `${title}.txt`;
     console.log('text:', editorContent);
 

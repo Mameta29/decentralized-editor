@@ -4,6 +4,7 @@ import { VisibilityType, Long, OnProgressEvent, GetUserBucketsRequest, ListObjec
 import { getOffchainAuthKeys } from './offchainAuth';
 
 export const createBucket = async (bucketName: string, creator: string, connector: any) => {
+  const bucketNameNotEmpty = "my-bucket3";
   const spInfo = await selectSp();
   const provider = await connector?.getProvider();
   console.log("connector", connector)
@@ -14,7 +15,7 @@ export const createBucket = async (bucketName: string, creator: string, connecto
   }
   console.log('createBucket', bucketName, creator);
   const createBucketTx = await client.bucket.createBucket({
-    bucketName,
+    bucketName: bucketNameNotEmpty,
     creator,
     visibility: VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
     chargedReadQuota: Long.ZERO,
@@ -48,7 +49,13 @@ export const saveTextToGreenfield = async (bucketName: string, objectName: strin
   if (!offChainData) {
     throw new Error('No offchain, please create offchain pairs first');
   }
+  console.log("bucketName", bucketName)
+  console.log("objectName", objectName)
+  // const bucketNameNotEmpty = "my-bucket3";
+  // console.log("bucketNameNotEmpty", bucketNameNotEmpty)
 
+
+  // createBucket(bucketNameNotEmpty, creator, connector);
   // .txt 拡張子が既に含まれているかチェック
   const fileName = objectName.endsWith('.txt') ? objectName : `${objectName}.txt`;
 
@@ -59,8 +66,8 @@ export const saveTextToGreenfield = async (bucketName: string, objectName: strin
 
   try {
     const res = await client.object.delegateUploadObject({
-      bucketName: bucketName,
-      objectName: fileName,
+      bucketName,
+      objectName,
       body: file,
       delegatedOpts: {
         visibility: VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
@@ -73,20 +80,70 @@ export const saveTextToGreenfield = async (bucketName: string, objectName: strin
       address: creator,
       domain: window.location.origin,
       seed: offChainData.seedString,
-    });
+    })
 
     if (res.code === 0) {
-      console.log('Object created successfully');
-      return res;
-    } else {
-      throw new Error(`Failed to create object: ${res.message}`);
+      alert('create object success');
     }
   } catch (err) {
-    console.error('Error creating object:', err);
+    console.log(typeof err)
     if (err instanceof Error) {
-      throw new Error(`Error creating object: ${err.message}`);
+      alert(err.message);
+    }
+    if (err && typeof err ==='object') {
+      alert(JSON.stringify(err))
+    }
+  }
+};
+
+export const deleteObject = async (bucketName: string, objectName: string, operator: string, connector: any) => {
+  const spInfo = await selectSp();
+  const provider = await connector?.getProvider();
+  console.log("connector", connector);
+  const offChainData = await getOffchainAuthKeys(operator, provider);
+  if (!offChainData) {
+    throw new Error('No offchain, please create offchain pairs first');
+  }
+
+  // バケット名が空の場合はデフォルト値を使用
+  const effectiveBucketName = bucketName || "my-bucket3";
+
+  try {
+    console.log('Deleting object', effectiveBucketName, objectName, operator);
+    const deleteObjectTx = await client.object.deleteObject({
+      bucketName: effectiveBucketName,
+      objectName,
+      operator,
+    });
+
+    // シミュレーション
+    const simulateInfo = await deleteObjectTx.simulate({
+      denom: 'BNB',
+    });
+    console.log('Simulate info:', simulateInfo);
+
+    // ブロードキャスト
+    const res = await deleteObjectTx.broadcast({
+      denom: 'BNB',
+      gasLimit: Number(simulateInfo?.gasLimit),
+      gasPrice: simulateInfo?.gasPrice || '5000000000',
+      payer: operator,
+      granter: '',
+    });
+    console.log('Delete object transaction:', res);
+
+    if (res.code === 0) {
+      console.log('Object deleted successfully');
+      return res;
     } else {
-      throw new Error(`Unknown error creating object: ${JSON.stringify(err)}`);
+      throw new Error(`Failed to delete object: ${res}`);
+    }
+  } catch (err) {
+    console.error('Error deleting object:', err);
+    if (err instanceof Error) {
+      throw new Error(`Error deleting object: ${err.message}`);
+    } else {
+      throw new Error(`Unknown error deleting object: ${JSON.stringify(err)}`);
     }
   }
 };
@@ -102,7 +159,6 @@ export const listBuckets = async (address: string, connector: any): Promise<stri
   //   alert('No offchain, please create offchain pairs first');
   //   return;
   // }
-
   try {
     const response = await client.bucket.listBuckets({
       address: address,
@@ -140,7 +196,7 @@ export const listBucketObjects = async (bucketName: string, connector: any, addr
     if (!response || !response.body?.GfSpListObjectsByBucketNameResponse?.Objects) {
       return [];
     }
-    return response.body.GfSpListObjectsByBucketNameResponse.Objects;
+    return response.body.GfSpListObjectsByBucketNameResponse.Objects as any;
   } catch (error) {
     console.error('Error fetching bucket objects:', error);
     throw error;

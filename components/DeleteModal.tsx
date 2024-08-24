@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { deleteDocument } from "@/lib/actions/room.actions";
+import { deleteObject } from "@/lib/greenfield";
 
 import {
   Dialog,
@@ -27,6 +28,8 @@ export const DeleteModal = ({ roomId }: DeleteModalProps) => {
 
     try {
       await deleteDocument(roomId);
+      // await deleteObject(bucketName, objectName, operator, connector);
+
       setOpen(false);
     } catch (error) {
       console.log("Error notif:", error);
