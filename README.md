@@ -12,10 +12,10 @@ Imagine a world where your documents are not just collaboratively edited in real
 
 ## 🛠 Technology Stack
 
-- **Frontend**: Next.js, React
+- **Frontend**: Next.js, React, Typescript
 - **Real-time Collaboration**: Liveblocks
 - **Decentralized Storage**: BNB Greenfield
-- **Blockchain Interaction**: ethers.js
+- **Blockchain Interaction**: viem, wagmi, rainbowkit
 
 ## 🔍 Key Features
 
