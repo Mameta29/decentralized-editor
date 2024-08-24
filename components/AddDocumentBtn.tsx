@@ -11,8 +11,16 @@ const AddDocumentBtn = ({ userId, email }: AddDocumentBtnProps) => {
   const addDocumentHandler = async () => {
     try {
       const room = await createDocument({ userId, email });
+      console.log('Room:', room);
+      console.log("userId:", userId);
+      console.log("email:", email);
 
-      if(room) router.push(`/documents/${room.id}`);
+      if(room) {
+        console.log("AddDocumentBTN rommid", room.id)
+        router.push(`/documents/${room.id}`);
+        // 強制的な再レンダリングを試みる
+        router.refresh();
+      };
     } catch (error) {
       console.log(error)
     }

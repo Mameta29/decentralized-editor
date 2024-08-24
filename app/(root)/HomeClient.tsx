@@ -25,10 +25,13 @@ const HomeClient: React.FC<HomeClientProps> = ({ initialDocuments }) => {
   const { address, isConnected } = useAccount();
   const router = useRouter();
   const [documents, setDocuments] = useState(initialDocuments);
+  console.log("Home:documents.length", documents.data.length)
+  console.log("Home:documents.id", documents.data[1].id)
   console.log("HomeClient")
 
   useEffect(() => {
     if (!isConnected || !address) {
+      console.log("Home: Redirecting to sign-in", { isConnected, address });
       router.push('/sign-in');
     }
   }, [isConnected, address, router]);
@@ -36,6 +39,7 @@ const HomeClient: React.FC<HomeClientProps> = ({ initialDocuments }) => {
   if (!isConnected || !address) {
     return null; // または適切なローディング表示
   }
+  console.log("Home:documents", documents)
 
   return (
     <main className="home-container">
@@ -60,6 +64,7 @@ const HomeClient: React.FC<HomeClientProps> = ({ initialDocuments }) => {
             {documents.data.map(({ id, metadata, createdAt }: any) => (
               <li key={id} className="document-list-item">
                 <Link href={`/documents/${id}`} className="flex flex-1 items-center gap-4">
+                <p>{id}</p>
                   <div className="hidden rounded-md bg-dark-500 p-2 sm:block">
                     <Image 
                       src="/assets/icons/doc.svg"

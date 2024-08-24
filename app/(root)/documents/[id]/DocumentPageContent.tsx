@@ -1,21 +1,18 @@
 import { getDocument } from "@/lib/actions/room.actions";
-import { cookies } from 'next/headers';
 import { redirect } from "next/navigation";
 import DocumentClient from "./DocumentClient";
 
 type UserType = 'editor' | 'viewer';
 
-const DocumentPage = async ({ params: { id } }: { params: { id: string } }) => {
-  const cookieStore = cookies();
-  const userId = cookieStore.get('wallet_address')?.value;
+const DocumentPageContent = async ({ id, userId }: { id: string; userId: string }) => {
+  console.log("DocumentPage: Fetching room", id);
+  const room = await getDocument({
+    roomId: id,
+    userId: userId,
+  });
+  console.log("DocumentPage: Room fetched", !!room);
 
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
-  const room = await getDocument({ roomId: id, userId });
-
-  if (!room) {
+  if(!room) {
     console.log("DocumentPage: Room not found, redirecting to home");
     redirect('/');
   }
@@ -42,4 +39,4 @@ const DocumentPage = async ({ params: { id } }: { params: { id: string } }) => {
   );
 };
 
-export default DocumentPage;
+export default DocumentPageContent;

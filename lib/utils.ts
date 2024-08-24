@@ -94,3 +94,23 @@ export function getUserColor(userId: string) {
   const colorIndex = sum % brightColors.length;
   return brightColors[colorIndex];
 }
+
+// クライアント側でアバターを生成する関数
+export function generateAvatarSvg(avatarId: string): string {
+  const [pattern, bgColor] = avatarId.split('-');
+  
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50">`;
+  svg += `<rect width="50" height="50" fill="#${bgColor}" />`;
+
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      if (pattern[i * 5 + j] === '1') {
+        svg += `<rect x="${j * 10}" y="${i * 10}" width="10" height="10" fill="white" opacity="0.5" />`;
+      }
+    }
+  }
+
+  svg += '</svg>';
+
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
+}

@@ -1,5 +1,5 @@
 import { liveblocks } from "@/lib/liveblocks";
-import { getUserColor } from "@/lib/utils";
+import { getUserColor, generateAvatarSvg } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from 'next/headers';
 
@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
     const walletAddress = cookieStore.get('wallet_address')?.value;
 
     console.log('Wallet address from cookie:', walletAddress);
+    console.log('All cookies:', cookieStore.getAll());
 
     if (!walletAddress) {
       console.log('No wallet address found, returning 401');
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-
+  
     // ウォレットアドレスをユーザー情報として使用
     const user = {
       id: walletAddress,
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
         id: walletAddress,
         name: `Wallet ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`,
         email: `${walletAddress}@example.com`, // 仮のメールアドレス
-        avatar: "", // アバター画像がない場合は空文字列または適切なデフォルト値を設定
+        avatar: generateAvatarSvg(walletAddress), // アバター画像がない場合は空文字列または適切なデフォルト値を設定
         color: getUserColor(walletAddress),
       }
     }
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Identify the user and return the result
     const { status, body } = await liveblocks.identifyUser(
       {
-        userId: user.info.email,
+        userId: user.info.id,
         groupIds: [],
       },
       { userInfo: user.info },

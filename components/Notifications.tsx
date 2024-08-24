@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
-import * as Liveblocks from '@liveblocks/react';
 import {
   Popover,
   PopoverContent,
@@ -12,47 +11,33 @@ import { InboxNotification, InboxNotificationList, LiveblocksUIConfig } from "@l
 import { useInboxNotifications, useUnreadInboxNotificationsCount } from "@liveblocks/react/suspense"
 import Image from "next/image"
 import { ReactNode } from "react"
-import { createClient } from '@liveblocks/client';
 
 const Notifications = () => {
   const { address, isConnected } = useAccount();
   const [error, setError] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const initializeLiveblocks = async () => {
-      if (isConnected && address) {
-        console.log('Initializing Liveblocks for address:', address);
-        try {
-          // await Liveblocks.init({
-          //   authEndpoint: '/api/liveblocks-auth',
-          // });
-          const newClient = createClient({
-            authEndpoint: '/api/liveblocks-auth',
-          });
-          console.log('Liveblocks initialized successfully');
-          setIsInitialized(true);
-        } catch (err: unknown) {
-          console.error('Liveblocks initialization error:', err);
-          setError('Failed to initialize Liveblocks: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        }
-      } else {
-        console.log('Wallet not connected or address not available');
-        setError('Please connect your wallet to view notifications');
-      }
-    };
-
-    initializeLiveblocks();
+    if (isConnected && address) {
+      // クッキーにウォレットアドレスを設定
+      document.cookie = `wallet_address=${address}; path=/; max-age=3600; SameSite=Strict`;
+    } else {
+      console.log('Wallet not connected or address not available');
+      setError('Please connect your wallet to view notifications');
+    }
   }, [isConnected, address]);
 
   if (error) {
     return <div>Error: {error}</div>;
   }
 
-  if (!isInitialized) {
-    return <div>Loading notifications...</div>;
+  if (!isConnected || !address) {
+    return <div>Please connect your wallet to view notifications</div>;
   }
 
+  return <NotificationsContent />;
+};
+
+const NotificationsContent = () => {
   return (
     <Popover>
       <PopoverTrigger className="relative flex size-10 items-center justify-center rounded-lg">

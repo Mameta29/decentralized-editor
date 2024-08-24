@@ -1,15 +1,12 @@
-
 "use client";
-
-import { useAccount } from 'wagmi';
-import { redirect } from "next/navigation";
+import { memo } from 'react';
 import CollaborativeRoom from "@/components/CollaborativeRoom";
 
 type UserType = 'editor' | 'viewer';
 
 interface DocumentClientProps {
   id: string;
-  room: any; // roomの型は適切に定義してください
+  room: any;
   usersData: Array<{
     id: string;
     name: string;
@@ -18,16 +15,11 @@ interface DocumentClientProps {
     color: string;
     userType: UserType;
   }>;
+  currentUserType: UserType;
 }
 
-const DocumentClient: React.FC<DocumentClientProps> = ({ id, room, usersData }) => {
-  const { address, isConnected } = useAccount();
-
-  if (!isConnected || !address) {
-    redirect('/sign-in');
-  }
-
-  const currentUserType = room.usersAccesses[address]?.includes('room:write') ? 'editor' : 'viewer';
+const DocumentClient: React.FC<DocumentClientProps> = memo(({ id, room, usersData, currentUserType }) => {
+  console.log("DocumentClient:id", id);
 
   return (
     <main className="flex w-full flex-col items-center">
@@ -39,6 +31,8 @@ const DocumentClient: React.FC<DocumentClientProps> = ({ id, room, usersData }) 
       />
     </main>
   );
-};
+});
+
+DocumentClient.displayName = 'DocumentClient';
 
 export default DocumentClient;
