@@ -45,15 +45,3 @@ We're not stopping here! Our vision for the future includes:
 ## 🏆 Hackathon Context
 
 This project was developed as part of [Hackathon Name], where we aimed to revolutionize document editing by combining the power of real-time collaboration with the security and ownership benefits of decentralized storage.
-
-## 🤝 Contribution
-
-We welcome contributions! Please see our [Contribution Guidelines](CONTRIBUTING.md) for more information.
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-Join us in reshaping the future of document editing – where collaboration meets decentralization! 🚀📝🔗
